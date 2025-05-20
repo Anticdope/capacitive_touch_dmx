@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include <TeensyDMX.h>
+#include <CapacitiveSensor.h>
 
 // Use the TeensyDMX “Sender” on Serial1 (DMX TX on pin 1)
 namespace teensydmx = ::qindesign::teensydmx;
 teensydmx::Sender dmxTx{Serial1};
 
-const uint8_t triggerPin       = 8;    // external open-drain pulls this LOW to trigger
+CapacitiveSensor   cap_sensor = CapacitiveSensor(9,8); 
+
 const uint8_t ledPin           = 13;
 const uint8_t NUM_RGB_FIX      = 6;    // six RGB fixtures
 const uint8_t CH_PER_RGB       = 3;    // each uses R,G,B
@@ -13,8 +15,6 @@ const uint8_t CH_LAST_FIX      = 1;    // one single-channel fixture at the end
 const uint16_t TOTAL_DMX_CH    = NUM_RGB_FIX * CH_PER_RGB + CH_LAST_FIX;
 
 void setup() {
-  // Configure trigger pin as pull-up input
-  pinMode(triggerPin, INPUT_PULLUP);
   pinMode(ledPin, OUTPUT);
   digitalWriteFast(ledPin, HIGH);
 
@@ -33,7 +33,6 @@ static void setRGB(uint8_t fixtureIndex, uint8_t val) {
 }
 
 void loop() {
-
   bool trigger = digitalRead(triggerPin);
   // On falling edge and not yet run:
   if (trigger == LOW) {
